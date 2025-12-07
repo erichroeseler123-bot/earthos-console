@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EarthOS TRSL Console</title>
+    <style>
+        body {
+            background-color: #0d0d0d;
+            color: #00ff41;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .console {
+            border: 2px solid #00ff41;
+            padding: 20px;
+            width: 400px;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+        }
+        h1 { border-bottom: 1px solid #00ff41; padding-bottom: 10px; }
+        .metric { margin: 15px 0; display: flex; justify-content: space-between; }
+        .value { font-weight: bold; }
+        .status-blink { animation: blink 2s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div class="console">
+        <h1>EarthOS <span class="status-blink">[ONLINE]</span></h1>
+        <div id="data-display">Fetching telemetry...</div>
+    </div>
+
+    <script>
+        // This targets your live Cloudflare Worker
+        const API_URL = '/api';
+
+        async function fetchData() {
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                
+                const earth = data.modules.earth;
+                const html = `
+                    <div class="metric"><span>SYSTEM:</span> <span class="value">${data.system}</span></div>
+                    <div class="metric"><span>VERSION:</span> <span class="value">${data.version}</span></div>
+                    <hr style="border-color: #00ff41; opacity: 0.3;">
+                    <div class="metric"><span>ATMOSPHERE:</span> <span class="value">${earth.atmosphere}</span></div>
+                    <div class="metric"><span>HYDROSPHERE:</span> <span class="value">${earth.hydrosphere}</span></div>
+                    <div class="metric"><span>LITHOSPHERE:</span> <span class="value">${earth.lithosphere}</span></div>
+                `;
+                document.getElementById('data-display').innerHTML = html;
+            } catch (err) {
+                document.getElementById('data-display').innerText = 'ERROR: Link Failure';
+                console.error(err);
+            }
+        }
+
+        fetchData();
+    </script>
+</body>
+</html>
