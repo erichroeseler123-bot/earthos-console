@@ -1,11 +1,13 @@
-## 🌍 Earth Module
+# EarthOS Console
 
-**System Status:** `ONLINE`
-**TRSL Version:** v2.4.0
+## What
+- Small console-facing prototype repo for `earthos` experiments.
 
-### Core Metrics
-* **Atmosphere:** Stable (78% N2, 21% O2)
-* **Hydrosphere:** Monitoring levels
-* **Lithosphere:** Active tectonic tracking
+## Role
+- Lightweight support surface, not a canonical public app or booking system.
 
-> **Note:** TRSL Console connection established via secure uplink.
+## Run
+- No local runtime commands are documented in this repo.
+
+## Status
+- `experimental`
