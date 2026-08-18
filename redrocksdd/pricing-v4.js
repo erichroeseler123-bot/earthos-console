@@ -33,17 +33,23 @@
       feeList.prepend(d);
     }
     const calcPrice=document.querySelector('#calcprice');
-    if(calcPrice){
-      const wrap=calcPrice.parentElement;
-      if(wrap) wrap.innerHTML='<label>Transportation</label><div class="fixed-price">$250 fixed</div>';
-    }
+    if(calcPrice){const wrap=calcPrice.parentElement;if(wrap)wrap.innerHTML='<label>Transportation</label><div class="fixed-price">$250 fixed</div>';}
     const mathBig=app.querySelector('.math-card .math-big'); if(mathBig) mathBig.textContent='$49.83';
     const math=app.querySelector('.math-card .muted'); if(math) math.textContent='$299 total ÷ 6';
     const fine=app.querySelector('.fineprint'); if(fine) fine.textContent='$299 total trip cost. $49 is due only after your DD accepts; $250 is due at pickup. Divide $299 by your group size to compare per-person cost.';
   }
+  function patchOperator(root=document){
+    patchMoney(root);
+    replaceText(root,'Your transportation price: $250','Trip pay: $250');
+    replaceText(root,'Your transportation price','Trip pay');
+    replaceText(root,'Your transportation price does not change.','Every Red Rocks DD trip pays $250 at pickup, plus any optional tip.');
+    replaceText(root,'operator price','$250 trip pay');
+    replaceText(root,'operator transportation price','$250 trip pay');
+    const pp=document.querySelector('#pp');
+    if(pp){pp.value='250';pp.disabled=true;const label=pp.closest('.f')?.querySelector('label');if(label)label.textContent='Trip pay (fixed)';}
+  }
   const oldHome=window.home;
   if(oldHome){window.home=function(){oldHome();patchHome();updateCostCalc();}}
-  const oldCalc=window.updateCostCalc;
   window.updateCostCalc=function(){
     const g=+(document.querySelector('#calcgroup')?.value||6),per=TOTAL/g;
     const out=document.querySelector('#calcper'),cmp=document.querySelector('#calccompare');
@@ -65,8 +71,8 @@
   if(oldBook){window.book=function(){oldBook.apply(this,arguments);setTimeout(()=>{
     const m=document.querySelector('#modal');if(!m)return;patchMoney(m);
     replaceText(m,'operator transportation price due service day','$250 due at pickup');
-    replaceText(m,'operator\'s listed transportation price is separate from the $49 Red Rocks DD reservation','total trip cost is $299: $49 to reserve after acceptance and $250 at pickup');
-    replaceText(m,'operator\'s listed transportation price is separate from the $59 Red Rocks DD reservation','total trip cost is $299: $49 to reserve after acceptance and $250 at pickup');
+    replaceText(m,"operator's listed transportation price is separate from the $49 Red Rocks DD reservation",'total trip cost is $299: $49 to reserve after acceptance and $250 at pickup');
+    replaceText(m,"operator's listed transportation price is separate from the $59 Red Rocks DD reservation",'total trip cost is $299: $49 to reserve after acceptance and $250 at pickup');
   },0);}}
   const oldRequest=window.refreshRequest;
   if(oldRequest){window.refreshRequest=async function(){await oldRequest.apply(this,arguments);setTimeout(()=>{
@@ -86,9 +92,22 @@
     const priceInput=document.querySelector('#cpr');
     if(priceInput){priceInput.value='250';priceInput.disabled=true;const label=priceInput.closest('.f')?.querySelector('label');if(label)label.textContent='Trip pay (fixed)';}
     const banner=app.querySelector('.founding-banner p');if(banner && !/\$250/.test(banner.textContent)) banner.insertAdjacentHTML('beforeend',' <b>Every accepted trip pays $250 at pickup, plus tips.</b>');
-    const season=app.querySelector('.season-note');if(season) season.insertAdjacentHTML('afterend','<div class="service-strip"><b>The job:</b> one pickup, one Red Rocks tailgate, wait through the show, one ride home. Up to 8 hours total. You are not chasing fares all night.</div>');
+    const season=app.querySelector('.season-note');if(season && !document.querySelector('.wait-economics')) season.insertAdjacentHTML('afterend','<div class="service-strip wait-economics"><b>The job:</b> one pickup, one Red Rocks tailgate, wait through the show, one ride home. Up to 8 hours total. You are not chasing fares all night.</div>');
   },0);}}
   const oldSignup=window.signup;
   if(oldSignup){window.signup=async function(){const p=document.querySelector('#cpr');if(p){p.disabled=false;p.value='250'};try{return await oldSignup.apply(this,arguments)}finally{if(p){p.value='250';p.disabled=true}}}}
+  const oldDashboard=window.dashboard;
+  if(oldDashboard){window.dashboard=async function(){const r=await oldDashboard.apply(this,arguments);setTimeout(()=>patchOperator(document),0);return r;}}
+  const oldTab=window.tab;
+  if(oldTab){window.tab=function(){const r=oldTab.apply(this,arguments);setTimeout(()=>patchOperator(document),0);return r;}}
+  const oldSave=window.saveprof;
+  if(oldSave){window.saveprof=async function(){const p=document.querySelector('#pp');if(p){p.disabled=false;p.value='250'};try{return await oldSave.apply(this,arguments)}finally{if(p){p.value='250';p.disabled=true}}}}
+  const oldTerms=window.terms;
+  if(oldTerms){window.terms=function(){oldTerms();setTimeout(()=>{
+    const a=document.querySelector('#app');if(!a)return;patchMoney(a);
+    replaceText(a,"The operator's listed transportation price is separate and is due on the day of service.",'The Red Rocks DD trip price is $299 total: $49 to reserve after driver acceptance and $250 due at pickup.');
+    replaceText(a,'The $49 reservation is for marketplace reservation handling and is separate from the operator\'s transportation charge.','The $49 reservation secures the accepted booking and includes booking support. The remaining $250 is due at pickup.');
+    replaceText(a,'The $59 reservation is for marketplace reservation handling and is separate from the operator\'s transportation charge.','The $49 reservation secures the accepted booking and includes booking support. The remaining $250 is due at pickup.');
+  },0);}}
   document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{patchHome();patchMoney(document)},0));
 })();
